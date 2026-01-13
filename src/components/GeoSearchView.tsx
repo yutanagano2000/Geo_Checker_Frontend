@@ -8,12 +8,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Copy, Check } from "lucide-react";
 
 interface JudgmentResult {
   宅地造成等工事規制区域: boolean;
   特定盛土等規制区域: boolean;
 }
+
+const TEMPLATES = {
+  宅地造成等工事規制区域: "宅地造成規制区域。造成の規模によっては許可申請が必要。現調結果次第で判断いたします。",
+  特定盛土等規制区域: "特定盛土規制区域。造成の規模によっては届出 / 許可申請が必要。現調結果次第で判断いたします。",
+};
 
 export function GeoSearchView() {
   const [latitude, setLatitude] = useState("");
@@ -21,6 +26,7 @@ export function GeoSearchView() {
   const [prefecture, setPrefecture] = useState("");
   const [result, setResult] = useState<JudgmentResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedText, setCopiedText] = useState<string | null>(null);
 
   const handleSearch = async () => {
     setIsLoading(true);
@@ -45,6 +51,16 @@ export function GeoSearchView() {
       alert("判定に失敗しました。もう一度お試しください。");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedText(text);
+      setTimeout(() => setCopiedText(null), 2000);
+    } catch (error) {
+      console.error("コピーに失敗しました:", error);
     }
   };
 
@@ -130,43 +146,87 @@ export function GeoSearchView() {
             <h2 className="text-xl font-semibold text-foreground mb-4">判定結果</h2>
             
             {/* 宅地造成等工事規制区域 */}
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/50 border border-border">
-              <div className="flex-1">
-                <p className="font-medium text-foreground">宅地造成等工事規制区域</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/50 border border-border">
+                <div className="flex-1">
+                  <p className="font-medium text-foreground">宅地造成等工事規制区域</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {result.宅地造成等工事規制区域 ? (
+                    <>
+                      <CheckCircle2 className="w-6 h-6 text-green-500" />
+                      <span className="font-semibold text-green-500">該当します</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-6 h-6 text-red-500" />
+                      <span className="font-semibold text-muted-foreground">該当しません</span>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {result.宅地造成等工事規制区域 ? (
-                  <>
-                    <CheckCircle2 className="w-6 h-6 text-green-500" />
-                    <span className="font-semibold text-green-500">該当します</span>
-                  </>
-                ) : (
-                  <>
-                    <XCircle className="w-6 h-6 text-red-500" />
-                    <span className="font-semibold text-muted-foreground">該当しません</span>
-                  </>
-                )}
-              </div>
+              
+              {/* テンプレート文言（該当する場合のみ表示） */}
+              {result.宅地造成等工事規制区域 && (
+                <div className="flex items-start gap-2 p-4 rounded-2xl bg-muted/50 border border-border">
+                  <p className="flex-1 text-sm text-foreground leading-relaxed">
+                    {TEMPLATES.宅地造成等工事規制区域}
+                  </p>
+                  <button
+                    onClick={() => handleCopy(TEMPLATES.宅地造成等工事規制区域)}
+                    className="shrink-0 p-2 rounded-lg hover:bg-accent transition-colors"
+                    title="コピー"
+                  >
+                    {copiedText === TEMPLATES.宅地造成等工事規制区域 ? (
+                      <Check className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* 特定盛土等規制区域 */}
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/50 border border-border">
-              <div className="flex-1">
-                <p className="font-medium text-foreground">特定盛土等規制区域</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/50 border border-border">
+                <div className="flex-1">
+                  <p className="font-medium text-foreground">特定盛土等規制区域</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {result.特定盛土等規制区域 ? (
+                    <>
+                      <CheckCircle2 className="w-6 h-6 text-green-500" />
+                      <span className="font-semibold text-green-500">該当します</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-6 h-6 text-red-500" />
+                      <span className="font-semibold text-muted-foreground">該当しません</span>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {result.特定盛土等規制区域 ? (
-                  <>
-                    <CheckCircle2 className="w-6 h-6 text-green-500" />
-                    <span className="font-semibold text-green-500">該当します</span>
-                  </>
-                ) : (
-                  <>
-                    <XCircle className="w-6 h-6 text-red-500" />
-                    <span className="font-semibold text-muted-foreground">該当しません</span>
-                  </>
-                )}
-              </div>
+              
+              {/* テンプレート文言（該当する場合のみ表示） */}
+              {result.特定盛土等規制区域 && (
+                <div className="flex items-start gap-2 p-4 rounded-2xl bg-muted/50 border border-border">
+                  <p className="flex-1 text-sm text-foreground leading-relaxed">
+                    {TEMPLATES.特定盛土等規制区域}
+                  </p>
+                  <button
+                    onClick={() => handleCopy(TEMPLATES.特定盛土等規制区域)}
+                    className="shrink-0 p-2 rounded-lg hover:bg-accent transition-colors"
+                    title="コピー"
+                  >
+                    {copiedText === TEMPLATES.特定盛土等規制区域 ? (
+                      <Check className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* 入力情報表示 */}
@@ -174,6 +234,32 @@ export function GeoSearchView() {
               <p className="text-sm text-muted-foreground">
                 判定座標: 緯度 {latitude}, 経度 {longitude} ({prefecture === "hiroshima" ? "広島県" : "岡山県"})
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* 規制区域図のリンクを表示 */}
+        {result && (prefecture === "okayama" || prefecture === "hiroshima") && (
+          <div className="bg-card rounded-4xl border border-border shadow-lg p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-1">
+                  {prefecture === "hiroshima" ? "広島県" : "岡山県"} 規制区域図
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  詳細な規制区域図は{prefecture === "hiroshima" ? "広島県" : "岡山県"}の公式ページでご確認ください
+                </p>
+              </div>
+              <Button
+                onClick={() => window.open(
+                  prefecture === "hiroshima" 
+                    ? 'https://www.pref.hiroshima.lg.jp/soshiki/262/moridokeihatsu.html'
+                    : 'https://www.pref.okayama.jp/page/915358.html',
+                  '_blank'
+                )}
+              >
+                規制区域図を見る
+              </Button>
             </div>
           </div>
         )}
