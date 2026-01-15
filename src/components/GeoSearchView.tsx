@@ -238,6 +238,28 @@ export function GeoSearchView() {
           </div>
         )}
 
+        {/* Google Mapで確認するボタン */}
+        {result && (
+          <div className="bg-card rounded-4xl border border-border shadow-lg p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-1">地図で確認</h3>
+                <p className="text-sm text-muted-foreground">
+                  入力した座標をGoogle Mapで確認できます
+                </p>
+              </div>
+              <Button
+                onClick={() => window.open(
+                  `https://www.google.com/maps?q=${latitude},${longitude}`,
+                  '_blank'
+                )}
+              >
+                Google Mapで確認
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* 規制区域図のリンクを表示 */}
         {result && (prefecture === "okayama" || prefecture === "hiroshima") && (
           <div className="bg-card rounded-4xl border border-border shadow-lg p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
